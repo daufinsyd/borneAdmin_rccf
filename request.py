@@ -5,17 +5,20 @@ import requests
 import subprocess
 import json
 
-#with urllib.request.urlopen('http://127.0.0.1:8000') as f:
-#    print(f.read(200))
+WORK_DIR = '/home/sydney_manjaro/tmp'
 
-def sendHello(status, shortLog):
 
+def getUID():
     uniqID = subprocess.check_output(['./getUniqID.sh']).decode('ascii')
 
     uniqID = uniqID.replace('\n', '')
     uniqID = uniqID.replace(" ", '')
     print(uniqID)
     
+    return uniqID
+
+def sendHello(status, shortLog):
+    uniqID = getUID()
     
     info = subprocess.check_output(['uname', '-a']).decode('ascii')
     info = info.replace("\n", "")
@@ -23,11 +26,45 @@ def sendHello(status, shortLog):
     # If the rasp detects probleme on its own, it send status=1, otherwise 2
     userdata = {'id': uniqID, "status": status, "info": info, "shortLog":shortLog}
     resp = requests.post('http://127.0.0.1:8000/wthit/whatsup', data=userdata)
-    #resp = requests.get('http://127.0.0.1:8000')
     
     print(resp.text)
     return int(resp.text)
     
+def askServer():
+    # Ask server wether there is something to do.
+    
+    data = {'uuid': 1}#getUID()}
+    pendingActions = requests.post('http://127.0.0.1:8000/wthit/imbored', data=data)
+    unattendedActions = []
+    
+    print("Actions", pendingActions)
+    print(pendingActions.json()[1])
+    pendingActions = pendingActions.json()
+    completedActions = []
+    
+    # Save pendingActions whenever the terminal unexpectedly shutdown
+    with open(WORK_DIR + '/pending.json', 'w') as outfile:
+        json.dump(pendingActions, outfile)
+    
+    # Processing actions
+    for action in pendingActions:
+        if(action['codeCmd'] == 0):
+            print('[II] Exécution d\'une commande personnalisée', action['cmd'])
+        else:
+            pass
+        
+        # Remove accomplished action from pendingActions and add it to completedActions
+        completedActions.append(action['id'])
+        pendingActions =  [k for k in pendingActions if int(k['id']) != int(action['id'])]
+        with open(WORK_DIR + '/pending.json', 'w') as outfile:
+            json.dump(pendingActions, outfile)
+        
+        print('\nPending actions: ', pendingActions, '\nCompleted actions: ', completedActions)
+        
+    
+    # Send back to server all completed actions
+    
+
 def main():
     retry = 2;  # max: 2 loop
     status = 2
@@ -54,6 +91,8 @@ def main():
         else:
             print("Unexpected code")
             retry -= 1
+            
+    askServer()
             
 if __name__ == "__main__":
     main()

@@ -1,0 +1,25 @@
+Format des reponses json
+
+
+# Format
+
+serveur:
+
+{
+"0":{"codeCmd":"0","cmd":"ls","params":["a","r"]},
+"1":{"codeCmd":"1","cmd":1,"params":["param1","param2"]}
+}
+
+
+
+
+## codeCmd:
+ 0: commande bash
+ 1-x: fonction définie en python
+ 
+# Utilisation
+
+import json
+with open('test.json') as json_file:
+    data=json.load(json_file)
+data["0"]["codeCmd"]...
