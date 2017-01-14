@@ -5,6 +5,8 @@ import requests
 import subprocess
 import json
 
+import commands
+
 WORK_DIR = '/home/sydney_manjaro/tmp'
 
 
@@ -40,21 +42,30 @@ def askServer():
     print("Actions", pendingActions)
     print(pendingActions.json()[1])
     pendingActions = pendingActions.json()
-    completedActions = []
     
     # Save pendingActions whenever the terminal unexpectedly shutdown
     with open(WORK_DIR + '/pending.json', 'w') as outfile:
         json.dump(pendingActions, outfile)
     
+    completedActions = {}  # dict of completed actions with their status
+    
     # Processing actions
     for action in pendingActions:
+        cmdStatus = -1  # Return code of the issued command
         if(action['codeCmd'] == 0):
             print('[II] Exécution d\'une commande personnalisée', action['cmd'])
         else:
-            pass
+            if(action['cmd'] == 1):
+                cmdStatus = commands.sysUpdate()
+            elif(action['cmd'] == 2):
+                cmdStatus = commands.sysUpgrade()
+            elif(action['cmd'] == 3):
+                cmdStatus = commands.sysDistUpgrade()
+            elif(action['cmd'] == 10):
+                cmdStatus = commands.reboot()
         
-        # Remove accomplished action from pendingActions and add it to completedActions
-        completedActions.append(action['id'])
+        # Remove accomplished action from pendingActions and add it to completedActions (with its return code)
+        completedActions[action['id']] = cmdStatus
         pendingActions =  [k for k in pendingActions if int(k['id']) != int(action['id'])]
         with open(WORK_DIR + '/pending.json', 'w') as outfile:
             json.dump(pendingActions, outfile)
