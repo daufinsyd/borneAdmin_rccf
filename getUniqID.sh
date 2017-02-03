@@ -3,4 +3,6 @@
 
 # Return an unique and unchangeable ID
 
-/sbin/blkid | grep "$(df -h / | sed -n 2p | cut -d" " -f1):" | grep -o "UUID=\"[^\"]*\" " | sed "s/UUID=\"//;s/\"//"''''
+#/sbin/blkid | grep "$(df -h / | sed -n 2p | cut -d" " -f1):" | grep -o "UUID=\"[^\"]*\" " | sed "s/UUID=\"//;s/\"//"''''
+# New version
+blkid | grep -oP 'UUID="\K[^"]+' | sha256sum | awk '{print $1}'

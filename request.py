@@ -29,7 +29,7 @@ def sendHello(status, shortLog):
     userdata = {'id': uniqID, "status": status, "info": info, "shortLog":shortLog}
     resp = requests.post('http://127.0.0.1:8000/wthit/whatsup', data=userdata)
     
-    print(resp.text)
+    print("Hello svr", resp.text)
     return int(resp.text)
     
 def askServer():
@@ -40,38 +40,40 @@ def askServer():
     unattendedActions = []
     
     print("Actions", pendingActions)
-    print(pendingActions.json()[1])
-    pendingActions = pendingActions.json()
-    
-    # Save pendingActions whenever the terminal unexpectedly shutdown
-    with open(WORK_DIR + '/pending.json', 'w') as outfile:
-        json.dump(pendingActions, outfile)
-    
-    completedActions = {}  # dict of completed actions with their status
-    
-    # Processing actions
-    for action in pendingActions:
-        cmdStatus = -1  # Return code of the issued command
-        if(action['codeCmd'] == 0):
-            print('[II] Exécution d\'une commande personnalisée', action['cmd'])
-        else:
-            if(action['cmd'] == 1):
-                cmdStatus = commands.sysUpdate()
-            elif(action['cmd'] == 2):
-                cmdStatus = commands.sysUpgrade()
-            elif(action['cmd'] == 3):
-                cmdStatus = commands.sysDistUpgrade()
-            elif(action['cmd'] == 10):
-                cmdStatus = commands.reboot()
+    # pendingAction: if no action first element is the status return code
+    if len(pendingActions.json()):
+        print(pendingActions.json()[1])
+        pendingActions = pendingActions.json()
         
-        # Remove accomplished action from pendingActions and add it to completedActions (with its return code)
-        completedActions[action['id']] = cmdStatus
-        pendingActions =  [k for k in pendingActions if int(k['id']) != int(action['id'])]
+        # Save pendingActions whenever the terminal unexpectedly shutdown
         with open(WORK_DIR + '/pending.json', 'w') as outfile:
             json.dump(pendingActions, outfile)
         
-        print('\nPending actions: ', pendingActions, '\nCompleted actions: ', completedActions)
+        completedActions = {}  # dict of completed actions with their status
         
+        # Processing actions
+        for action in pendingActions:
+            cmdStatus = -1  # Return code of the issued command
+            if(action['codeCmd'] == 0):
+                print('[II] Exécution d\'une commande personnalisée', action['cmd'])
+            else:
+                if(action['cmd'] == 1):
+                    cmdStatus = commands.sysUpdate()
+                elif(action['cmd'] == 2):
+                    cmdStatus = commands.sysUpgrade()
+                elif(action['cmd'] == 3):
+                    cmdStatus = commands.sysDistUpgrade()
+                elif(action['cmd'] == 10):
+                    cmdStatus = commands.reboot()
+            
+            # Remove accomplished action from pendingActions and add it to completedActions (with its return code)
+            completedActions[action['id']] = cmdStatus
+            pendingActions =  [k for k in pendingActions if int(k['id']) != int(action['id'])]
+            with open(WORK_DIR + '/pending.json', 'w') as outfile:
+                json.dump(pendingActions, outfile)
+            
+            print('\nPending actions: ', pendingActions, '\nCompleted actions: ', completedActions)
+            
     
     # Send back to server all completed actions
     
@@ -104,7 +106,7 @@ def main():
             retry -= 1
             
     askServer()
-            
+     
 if __name__ == "__main__":
     main()
     
