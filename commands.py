@@ -13,7 +13,7 @@ def sysUpdate():
     # Function number: 1
     stdout = open("update.log", 'w')
     command = ['apt', 'update']
-    subprocess.call(command, stdout==stdout)
+    subprocess.call(command, stdout=stdout)
     
     return 0
     
@@ -22,7 +22,7 @@ def sysUpgrade():
     sysUpdate()
     stdout = open("upgrade.log", 'w')
     command = ['apt', '--assume-yes', 'upgrade']
-    subprocess.call(command, stdout==stdout)
+    subprocess.call(command, stdout=stdout)
     
     return 0
 
@@ -32,7 +32,7 @@ def sysDitUpgrade():
     sysUpgrade()
     stdout = open("dist-upgrade.log", 'w')
     command = ['apt', '--assume-yes', 'dist-upgrade']
-    subprocess.call(command, stdout==stdout)
+    subprocess.call(command, stdout=stdout)
     
     return 0
 
