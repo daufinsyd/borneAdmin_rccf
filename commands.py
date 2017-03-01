@@ -1,6 +1,14 @@
 #!/usr/bin/python
 import subprocess
 
+def setMaxVol(maxVol):
+    stdout = open("actions.log", 'a')
+    print("[II] Set maxVol to:", str(maxVol))
+    command = ['amixer', 'set', 'Master', '50%']
+    subprocess.call(command, stdout=stdout)
+
+    return 0
+
 def sysUpdate():
     # Function number: 1
     stdout = open("update.log", 'w')

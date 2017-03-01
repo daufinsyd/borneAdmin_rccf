@@ -56,7 +56,7 @@ def askServer():
             cmdStatus = -1  # Return code of the issued command
             if(action['codeCmd'] == 0):
                 print('[II] Exécution d\'une commande personnalisée', action['cmd'])
-            else:
+            elif action['codeCmd'] == 1:
                 if(action['cmd'] == 1):
                     cmdStatus = commands.sysUpdate()
                 elif(action['cmd'] == 2):
@@ -65,7 +65,10 @@ def askServer():
                     cmdStatus = commands.sysDistUpgrade()
                 elif(action['cmd'] == 10):
                     cmdStatus = commands.reboot()
-            
+	    else:
+		# Set max Vol
+		cmdStatus = commands.setMaxVol(action['cmd'])            
+
             # Remove accomplished action from pendingActions and add it to completedActions (with its return code)
             completedActions[action['id']] = cmdStatus
             pendingActions =  [k for k in pendingActions if int(k['id']) != int(action['id'])]
