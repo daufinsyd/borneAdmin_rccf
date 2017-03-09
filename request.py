@@ -65,9 +65,9 @@ def askServer():
                     cmdStatus = commands.sysDistUpgrade()
                 elif(action['cmd'] == 10):
                     cmdStatus = commands.reboot()
-	    else:
-		# Set max Vol
-		cmdStatus = commands.setMaxVol(action['cmd'])            
+            else:
+                # Set max Vol
+                cmdStatus = commands.setMaxVol(action['cmd'])            
 
             # Remove accomplished action from pendingActions and add it to completedActions (with its return code)
             completedActions[action['id']] = cmdStatus
